@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #faf5ff 0%, #fce7f3 100%);
+            min-height: 100vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            /* backdrop-filter: blur(4px); */
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(168, 85, 247, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(168, 85, 247, 0.4);
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .priority-high {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .priority-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .priority-low {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+
+        .btn-icon:hover {
+            background-color: #f3f4f6;
+        }
+
+        .btn-edit:hover {
+            background-color: #dbeafe;
+        }
+
+        .btn-delete:hover {
+            background-color: #fee2e2;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <nav style="background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1 style="font-size: 1.875rem; font-weight: 700;" class="gradient-text">
+                    🎁 My Wishlist
+                </h1>
+                <button id="addButton" class="btn-primary">
+                    + Add Item
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem;">
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">Your Wishlist</h2>
+            <p style="color: #6b7280; font-size: 1.125rem;">Keep track of things you want - <span id="itemCount">0</span> items</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading">
+            <p>Loading your wishlist...</p>
+        </div>
+
+        <!-- Items Grid -->
+        <div id="itemsContainer" class="grid-container" style="display: none;">
+            <!-- Items will be loaded here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="card" style="display: none; text-align: center; padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🎁</div>
+            <h3 style="font-size: 1.875rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">Your wishlist is empty</h3>
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">Start adding items you wish for!</p>
+            <button id="addButtonEmpty" class="btn-primary" style="padding: 0.75rem 2rem;">
+                Add Your First Item
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal Form -->
+    <div id="itemModal" class="modal">
+        <div class="card" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; margin: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 2rem; font-weight: 700; color: #1f2937;" id="modalTitle">Add New Item</h3>
+                <button id="closeModalBtn" style="background: none; border: none; font-size: 2.5rem; color: #6b7280; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+
+            <form id="itemForm">
+                <input type="hidden" id="itemId">
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                            Title <span style="color: #ef4444;">*</span>
+                        </label>
+                        <input type="text" id="title" required placeholder="Item name">
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.875rem;">Price</label>
+                        <input type="text" id="price" placeholder="$0.00">
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                            Type <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="type" required>
+                            <option value="personal">🎁 Personal</option>
+                            <option value="work">💼 Work</option>
+                            <option value="hobby">🎨 Hobby</option>
+                            <option value="tech">💻 Tech</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                            Priority <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select id="priority" required>
+                            <option value="high">🔴 High</option>
+                            <option value="medium" selected>🟡 Medium</option>
+                            <option value="low">🟢 Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.875rem;">Description</label>
+                    <textarea id="description" rows="4" placeholder="Add details about this item..."></textarea>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.875rem;">URL</label>
+                    <input type="url" id="url" placeholder="https://example.com">
+                </div>
+
+                <div style="display: flex; gap: 1rem; padding-top: 1rem;">
+                    <button type="submit" class="btn-primary" style="flex: 1; padding: 0.75rem;">
+                        💾 Save Item
+                    </button>
+                    <button type="button" id="cancelBtn" style="padding: 0.75rem 2rem; border: 2px solid #d1d5db; background: white; color: #374151; border-radius: 0.75rem; font-weight: 600; cursor: pointer;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL
+        const API_URL = 'http://localhost:8000';
+
+        // Global variables
+        let items = [];
+        let editingItemId = null;
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('itemModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('itemModal').classList.remove('active');
+            document.getElementById('itemForm').reset();
+            document.getElementById('modalTitle').textContent = 'Add New Item';
+            editingItemId = null;
+        }
+
+        // Load items from API
+        async function loadItems() {
+            try {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('itemsContainer').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+
+                const response = await fetch(`${API_URL}/api/items`);
+                if (!response.ok) throw new Error('Failed to load items');
+                
+                items = await response.json();
+                renderItems();
+            } catch (error) {
+                console.error('Error loading items:', error);
+                document.getElementById('loadingState').innerHTML = '<p style="color: #ef4444;">Error loading wishlist. Please refresh the page.</p>';
+            }
+        }
+
+        // Render items
+        function renderItems() {
+            const container = document.getElementById('itemsContainer');
+            const emptyState = document.getElementById('emptyState');
+            const loadingState = document.getElementById('loadingState');
+
+            loadingState.style.display = 'none';
+
+            // Update count
+            document.getElementById('itemCount').textContent = items.length;
+
+            if (items.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            container.innerHTML = items.map((item, index) => createItemCard(item, index)).join('');
+
+            // Attach event listeners
+            items.forEach(item => {
+                const editBtn = document.getElementById(`edit-${item.id}`);
+                const deleteBtn = document.getElementById(`delete-${item.id}`);
+                
+                if (editBtn) editBtn.addEventListener('click', () => editItem(item.id));
+                if (deleteBtn) deleteBtn.addEventListener('click', () => deleteItem(item.id));
+            });
+        }
+
+        // Create item card HTML
+        function createItemCard(item, index) {
+            const typeIcons = { personal: '🎁', work: '💼', hobby: '🎨', tech: '💻' };
+            const priorityClass = `priority-${item.priority}`;
+
+            return `
+                <div class="card fade-in" style="animation-delay: ${index * 0.1}s; opacity: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 2rem;">${typeIcons[item.type] || '✨'}</span>
+                            <span class="${priorityClass}" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">
+                                ${item.priority.toUpperCase()}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button id="edit-${item.id}" class="btn-icon btn-edit">
+                                <svg style="width: 1.25rem; height: 1.25rem; color: #2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button id="delete-${item.id}" class="btn-icon btn-delete">
+                                <svg style="width: 1.25rem; height: 1.25rem; color: #dc2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">${item.title}</h3>
+                    ${item.price ? `<p style="font-size: 1.5rem; font-weight: 700; color: #a855f7; margin-bottom: 0.5rem;">${item.price}</p>` : ''}
+                    ${item.description ? `<p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem; line-height: 1.5;">${item.description}</p>` : ''}
+                    ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" style="font-size: 0.875rem; color: #2563eb; text-decoration: underline; display: block; margin-bottom: 0.75rem;">View Link →</a>` : ''}
+                    <div style="font-size: 0.75rem; color: #9ca3af; padding-top: 0.75rem; border-top: 1px solid #f3f4f6;">
+                        Added ${item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Recently'}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Form submission
+        document.getElementById('itemForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value);
+            formData.append('description', document.getElementById('description').value);
+            formData.append('type', document.getElementById('type').value);
+            formData.append('priority', document.getElementById('priority').value);
+            formData.append('price', document.getElementById('price').value);
+            formData.append('url', document.getElementById('url').value);
+
+            try {
+                let response;
+                if (editingItemId) {
+                    response = await fetch(`${API_URL}/edit/${editingItemId}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    response = await fetch(`${API_URL}/add`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+
+                if (response.ok) {
+                    closeModal();
+                    await loadItems();
+                } else {
+                    alert('Error saving item. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error saving item:', error);
+                alert('Error saving item. Please try again.');
+            }
+        });
+
+        // Edit item
+        function editItem(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            editingItemId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Item';
+            document.getElementById('title').value = item.title || '';
+            document.getElementById('description').value = item.description || '';
+            document.getElementById('type').value = item.type || 'personal';
+            document.getElementById('priority').value = item.priority || 'medium';
+            document.getElementById('price').value = item.price || '';
+            document.getElementById('url').value = item.url || '';
+            
+            openModal();
+        }
+
+        // Delete item
+        async function deleteItem(id) {
+            if (!confirm('Are you sure you want to delete this item?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/delete/${id}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    await loadItems();
+                } else {
+                    alert('Error deleting item. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                alert('Error deleting item. Please try again.');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('addButton').addEventListener('click', openModal);
+        document.getElementById('addButtonEmpty').addEventListener('click', openModal);
+        document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+        document.getElementById('itemModal').addEventListener('click', (e) => {
+            if (e.target.id === 'itemModal') closeModal();
+        });
+
+        // Load items on page load
+        loadItems();
+    </script>
+</body>
+</html>

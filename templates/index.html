@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #faf5ff 0%, #fce7f3 100%);
+            min-height: 100vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(168, 85, 247, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(168, 85, 247, 0.4);
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .priority-high { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .priority-medium { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .priority-low { background-color: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+
+        .btn-icon:hover { background-color: #f3f4f6; }
+        .btn-edit:hover { background-color: #dbeafe; }
+        .btn-delete:hover { background-color: #fee2e2; }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-container { grid-template-columns: 1fr; }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <nav style="background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h1 style="font-size: 1.875rem; font-weight: 700;" class="gradient-text">
+                    My Wishlist
+                </h1>
+                <button id="addButton" class="btn-primary">
+                    + Add Item
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem;">
+        <div class="card" style="margin-bottom: 2rem;">
+            <h2 style="font-size: 2.5rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">Your Wishlist</h2>
+            <p style="color: #6b7280; font-size: 1.125rem;">Keep track of things you want - <span id="itemCount">0</span> items</p>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingState" class="loading">
+            <p>Loading your wishlist...</p>
+        </div>
+
+        <!-- Items Grid -->
+        <div id="itemsContainer" class="grid-container" style="display: none;"></div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="card" style="display: none; text-align: center; padding: 3rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🎁</div>
+            <h3 style="font-size: 1.875rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">Your wishlist is empty</h3>
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">Start adding items you wish for!</p>
+            <button id="addButtonEmpty" class="btn-primary" style="padding: 0.75rem 2rem;">
+                Add Your First Item
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="itemModal" class="modal">
+        <div class="card" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; margin: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 2rem; font-weight: 700; color: #1f2937;" id="modalTitle">Add New Item</h3>
+                <button id="closeModalBtn" style="background:none;border:none;font-size:2.5rem;color:#6b7280;cursor:pointer;">&times;</button>
+            </div>
+
+            <form id="itemForm">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label>Title <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="title" name="title" required placeholder="Item name">
+                    </div>
+                    <div>
+                        <label>Price</label>
+                        <input type="text" id="price" name="price" placeholder="$0.00">
+                    </div>
+                    <div>
+                        <label>Type <span style="color:#ef4444;">*</span></label>
+                        <select id="type" name="type" required>
+                            <option value="personal">Personal</option>
+                            <option value="work">Work</option>
+                            <option value="hobby">Hobby</option>
+                            <option value="tech">Tech</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Priority <span style="color:#ef4444;">*</span></label>
+                        <select id="priority" name="priority" required>
+                            <option value="high">High</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label>Description</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Add details..."></textarea>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label>URL</label>
+                    <input type="url" id="url" name="url" placeholder="https://example.com">
+                </div>
+
+                <div style="display: flex; gap: 1rem; padding-top: 1rem;">
+                    <button type="submit" class="btn-primary" style="flex: 1; padding: 0.75rem;">Save Item</button>
+                    <button type="button" id="cancelBtn" style="padding: 0.75rem 2rem; border: 2px solid #d1d5db; background: white; color: #374151; border-radius: 0.75rem; font-weight: 600; cursor: pointer;">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '';
+        let items = [];
+        let editingItemId = null;
+
+        function openModal() {
+            document.getElementById('itemModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('itemModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('itemForm').reset();
+            document.getElementById('modalTitle').textContent = 'Add New Item';
+            editingItemId = null;
+        }
+
+        async function loadItems() {
+            try {
+                document.getElementById('loadingState').style.display = 'block';
+                document.getElementById('itemsContainer').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+
+                const response = await fetch(`${API_URL}/api/items`);
+                if (!response.ok) throw new Error('Failed');
+                items = await response.json();
+                renderItems();
+            } catch (err) {
+                document.getElementById('loadingState').innerHTML = 
+                    '<p style="color:red;">Backend not running!<br>Run: <code>uvicorn main.py --reload</code></p>';
+            }
+        }
+
+        function renderItems() {
+            const container = document.getElementById('itemsContainer');
+            const emptyState = document.getElementById('emptyState');
+            const loading = document.getElementById('loadingState');
+            
+            loading.style.display = 'none';
+            document.getElementById('itemCount').textContent = items.length;
+
+            if (items.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            container.innerHTML = items.map((item, i) => `
+                <div class="card fade-in" style="animation-delay: ${i * 0.1}s; opacity: 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <span style="font-size: 2rem;">${item.type === 'personal' ? '🎁' : item.type === 'work' ? '💼' : item.type === 'hobby' ? '🎨' : '💻'}</span>
+                            <span class="priority-${item.priority}" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">
+                                ${item.priority.toUpperCase()}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="editItem('${item.id}')" class="btn-icon btn-edit">✏️</button>
+                            <button onclick="deleteItem('${item.id}')" class="btn-icon btn-delete">🗑️</button>
+                        </div>
+                    </div>
+                    <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.5rem;">${item.title}</h3>
+                    ${item.price ? `<p style="font-size:1.5rem;font-weight:700;color:#a855f7;margin-bottom:0.5rem;">${item.price}</p>` : ''}
+                    ${item.description ? `<p style="color:#6b7280;font-size:0.875rem;margin-bottom:1rem;">${item.description}</p>` : ''}
+                    ${item.url ? `<a href="${item.url}" target="_blank" style="color:#2563eb;font-size:0.875rem;">View Link</a>` : ''}
+                    <div style="font-size:0.75rem;color:#9ca3af;padding-top:0.75rem;border-top:1px solid #f3f4f6;margin-top:1rem;">
+                        Added ${new Date(item.createdAt).toLocaleDateString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.editItem = function(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+            editingItemId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Item';
+            document.getElementById('title').value = item.title;
+            document.getElementById('description').value = item.description || '';
+            document.getElementById('type').value = item.type;
+            document.getElementById('priority').value = item.priority;
+            document.getElementById('price').value = item.price || '';
+            document.getElementById('url').value = item.url || '';
+            openModal();
+        };
+
+        window.deleteItem = async function(id) {
+            if (!confirm('Delete forever?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/delete/${id}`, { method: 'POST' });
+                if (res.ok) loadItems();
+            } catch (e) { alert('Delete failed'); }
+        };
+
+        document.getElementById('itemForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const url = editingItemId ? `${API_URL}/api/edit/${editingItemId}` : `${API_URL}/api/add`;
+
+            try {
+                const res = await fetch(url, { method: 'POST', body: formData });
+                if (res.ok) {
+                    closeModal();
+                    loadItems();
+                } else {
+                    alert('Save failed!');
+                }
+            } catch (err) {
+                alert('No connection! Run: uvicorn main.py --reload');
+            }
+        };
+
+        document.getElementById('addButton').onclick = openModal;
+        document.getElementById('addButtonEmpty').onclick = openModal;
+        document.getElementById('closeModalBtn').onclick = closeModal;
+        document.getElementById('cancelBtn').onclick = closeModal;
+        document.getElementById('itemModal').onclick = (e) => {
+            if (e.target === document.getElementById('itemModal')) closeModal();
+        };
+
+        loadItems();
+    </script>
+</body>
+</html>
