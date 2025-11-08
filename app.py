@@ -30,14 +30,20 @@ app.add_middleware(
 # FIREBASE INITIALIZATION (SAFE CHECK)
 # ============================================================
 
-if not firebase_admin._apps:
-    cred_path = "serviceAccountKey.json"
-    if not os.path.exists(cred_path):
-        raise FileNotFoundError("❌ Missing Firebase serviceAccountKey.json file.")
-    cred = credentials.Certificate(cred_path)
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://wishlist-d6d7a-default-rtdb.firebaseio.com'
-    })
+import json, os
+from firebase_admin import credentials, initialize_app
+
+if os.path.exists("serviceAccountKey.json"):
+    # Local mode
+    cred = credentials.Certificate("serviceAccountKey.json")
+else:
+    # Cloud mode (Render, Railway)
+    cred_json = json.loads(os.environ["FIREBASE_KEY_JSON"])
+    cred = credentials.Certificate(cred_json)
+
+initialize_app(cred, {
+    'databaseURL': 'https://wishlist-d6d7a-default-rtdb.firebaseio.com'
+})
 
 # ============================================================
 # STATIC & TEMPLATE SETUP
