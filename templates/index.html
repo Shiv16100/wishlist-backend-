@@ -19,6 +19,7 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+            font-size: clamp(14px, 1.5vw, 16px);
         }
 
         @keyframes sunflowerGradient {
@@ -98,14 +99,14 @@
         .btn-primary {
             background: linear-gradient(135deg, #FF6B6B 0%, #FF1493 100%);
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: clamp(0.6rem, 1.5vw, 0.75rem) clamp(1.2rem, 3vw, 1.5rem);
             border-radius: 2rem;
             font-weight: 600;
             border: none;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
-            font-size: 1rem;
+            font-size: clamp(0.85rem, 1.8vw, 1rem);
         }
 
         .btn-primary:hover {
@@ -119,7 +120,7 @@
             backdrop-filter: blur(10px);
             border-radius: 1.5rem;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
+            padding: clamp(1rem, 2.5vw, 1.5rem);
             transition: all 0.3s ease;
             position: relative;
             z-index: 1;
@@ -137,10 +138,10 @@
 
         input, textarea, select {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: clamp(0.6rem, 1.5vw, 0.75rem) clamp(0.8rem, 2vw, 1rem);
             border: 2px solid #FFD700;
             border-radius: 1rem;
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
             transition: all 0.3s ease;
             background: rgba(255, 255, 255, 0.9);
         }
@@ -181,15 +182,21 @@
                 grid-template-columns: 1fr;
                 gap: 1rem;
             }
-            .card {
-                padding: 1rem;
+            .emoji-picker {
+                grid-template-columns: repeat(6, 1fr);
             }
-            body {
-                font-size: 14px;
+            .section-tabs {
+                gap: 0.4rem;
             }
-            .btn-primary {
-                padding: 0.6rem 1.2rem;
-                font-size: 0.9rem;
+        }
+
+        @media (max-width: 480px) {
+            .emoji-picker {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .emoji-btn {
+                font-size: 1.5rem;
+                padding: 0.4rem;
             }
         }
 
@@ -197,7 +204,7 @@
             text-align: center;
             padding: 2rem;
             color: #8B4513;
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 2vw, 1.2rem);
         }
 
         .section-tabs {
@@ -209,7 +216,7 @@
         }
 
         .tab-btn {
-            padding: 0.75rem 1.5rem;
+            padding: clamp(0.6rem, 1.5vw, 0.75rem) clamp(1rem, 2.5vw, 1.5rem);
             border: none;
             background: rgba(255, 255, 255, 0.7);
             border-radius: 2rem;
@@ -217,7 +224,7 @@
             transition: all 0.3s ease;
             font-weight: 600;
             color: #8B4513;
-            font-size: 0.95rem;
+            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
         }
 
         .tab-btn.active {
@@ -236,12 +243,13 @@
             margin-bottom: 0.5rem;
             font-weight: 600;
             color: #8B4513;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
         }
 
         .love-thought-card {
             background: linear-gradient(135deg, #FFF0F5, #FFE4E1);
             border: 2px solid #FF69B4;
-            padding: 1.5rem;
+            padding: clamp(1rem, 2.5vw, 1.5rem);
             border-radius: 1.5rem;
             margin-bottom: 1rem;
             box-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
@@ -524,6 +532,15 @@
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
+                    <label>Added By <span style="color:#FF1493;">*</span></label>
+                    <select id="addedBy" name="addedBy" required>
+                        <option value="bubu">🐻 Bubu (Shivesh)</option>
+                        <option value="dudu">🦄 Dudu (Deepika)</option>
+                        <option value="both">💕 Both of Us</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
                     <label>Description 📝</label>
                     <textarea id="description" name="description" rows="3" placeholder="Tell me more about this..."></textarea>
                 </div>
@@ -703,7 +720,7 @@
             container.innerHTML = wishlistItems.map(item => `
                 <div class="card priority-${item.priority || 'medium'} fade-in">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <div style="font-size: 3rem;">${item.emoji || '🎁'}</div>
+                        <div style="font-size: clamp(2rem, 5vw, 3rem);">${item.emoji || '🎁'}</div>
                         <div style="display: flex; gap: 0.5rem;">
                             <button class="btn-icon btn-edit" onclick="editItem('${item.id}')" title="Edit">
                                 ✏️
@@ -714,22 +731,24 @@
                         </div>
                     </div>
                     
-                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: inherit;">
+                    <h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 700; margin-bottom: 0.5rem; color: inherit;">
                         ${item.title}
                     </h3>
                     
+                    ${getAddedByBadge(item.addedBy)}
+                    
                     ${item.description ? `
-                        <p style="color: #5C4033; margin-bottom: 0.75rem; line-height: 1.6;">
+                        <p style="color: #5C4033; margin-bottom: 0.75rem; line-height: 1.6; font-size: clamp(0.9rem, 1.8vw, 1rem);">
                             ${item.description}
                         </p>
                     ` : ''}
                     
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
-                        <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                        <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 600;">
                             ${getCategoryIcon(item.type)} ${item.type}
                         </span>
                         ${item.price ? `
-                            <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                            <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 600;">
                                 💰 ${item.price}
                             </span>
                         ` : ''}
@@ -758,7 +777,7 @@
             container.innerHTML = thoughts.map(thought => `
                 <div class="love-thought-card fade-in">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #C41E3A;">
+                        <h3 style="font-size: clamp(1.2rem, 3vw, 1.5rem); font-weight: 700; color: #C41E3A;">
                             💭 ${thought.title}
                         </h3>
                         <div style="display: flex; gap: 0.5rem;">
@@ -770,11 +789,12 @@
                             </button>
                         </div>
                     </div>
-                    <p style="color: #5C4033; line-height: 1.8; font-size: 1.1rem;">
+                    ${getAddedByBadge(thought.addedBy)}
+                    <p style="color: #5C4033; line-height: 1.8; font-size: clamp(0.95rem, 2vw, 1.1rem); margin-top: 0.75rem;">
                         ${thought.description}
                     </p>
                     ${thought.createdAt ? `
-                        <p style="color: #999; font-size: 0.85rem; margin-top: 1rem; text-align: right;">
+                        <p style="color: #999; font-size: clamp(0.75rem, 1.5vw, 0.85rem); margin-top: 1rem; text-align: right;">
                             ${new Date(thought.createdAt).toLocaleDateString()}
                         </p>
                     ` : ''}
@@ -798,10 +818,10 @@
                 <div class="card priority-${dream.priority || 'medium'} fade-in">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
                         <div>
-                            <h3 style="font-size: 1.75rem; font-weight: 700; color: inherit; margin-bottom: 0.5rem;">
+                            <h3 style="font-size: clamp(1.2rem, 3vw, 1.75rem); font-weight: 700; color: inherit; margin-bottom: 0.5rem;">
                                 🌟 ${dream.title}
                             </h3>
-                            <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                            <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: clamp(0.75rem, 1.5vw, 0.85rem); font-weight: 600;">
                                 ${getCategoryIcon(dream.category || dream.type)} ${dream.category || dream.type}
                             </span>
                         </div>
@@ -815,8 +835,10 @@
                         </div>
                     </div>
                     
+                    ${getAddedByBadge(dream.addedBy)}
+                    
                     ${dream.description ? `
-                        <p style="color: #5C4033; line-height: 1.6; margin-top: 1rem;">
+                        <p style="color: #5C4033; line-height: 1.6; margin-top: 1rem; font-size: clamp(0.9rem, 1.8vw, 1rem);">
                             ${dream.description}
                         </p>
                     ` : ''}
@@ -839,6 +861,19 @@
                 'other': '🌟'
             };
             return icons[type] || '🌟';
+        }
+
+        // Get added by badge
+        function getAddedByBadge(addedBy) {
+            if (!addedBy) return '';
+            
+            const badges = {
+                'bubu': '<span class="added-by-badge">🐻 Added by Bubu</span>',
+                'dudu': '<span class="added-by-badge" style="background: linear-gradient(135deg, #E6E6FA, #DDA0DD); color: #6B238E;">🦄 Added by Dudu</span>',
+                'both': '<span class="added-by-badge" style="background: linear-gradient(135deg, #FFE5E5, #FFD1DC); color: #C41E3A;">💕 Added by Both</span>'
+            };
+            
+            return `<div style="margin-bottom: 0.75rem;">${badges[addedBy] || ''}</div>`;
         }
 
         // Switch section
@@ -935,10 +970,11 @@
                 formData.append('price', document.getElementById('price').value);
                 formData.append('url', document.getElementById('url').value);
                 
-                // Add emoji to description for storage
+                // Add emoji and addedBy to description for storage
                 const emoji = document.getElementById('emoji').value;
+                const addedBy = document.getElementById('addedBy').value;
                 const description = document.getElementById('description').value;
-                formData.set('description', `${emoji}|${description}`);
+                formData.set('description', `EMOJI:${emoji}|ADDEDBY:${addedBy}|${description}`);
                 
                 try {
                     const url = itemId ? `${API_URL}/api/edit/${itemId}` : `${API_URL}/api/add`;
@@ -963,9 +999,10 @@
                 
                 const formData = new FormData();
                 const thoughtId = document.getElementById('thoughtId').value;
+                const addedBy = document.getElementById('thoughtAddedBy').value;
                 
                 formData.append('title', document.getElementById('thoughtTitle').value);
-                formData.append('description', document.getElementById('thoughtMessage').value);
+                formData.append('description', `ADDEDBY:${addedBy}|${document.getElementById('thoughtMessage').value}`);
                 formData.append('type', 'thought');
                 formData.append('priority', 'medium');
                 formData.append('price', '');
@@ -994,18 +1031,18 @@
                 
                 const formData = new FormData();
                 const dreamId = document.getElementById('dreamId').value;
+                const addedBy = document.getElementById('dreamAddedBy').value;
                 
                 formData.append('title', document.getElementById('dreamTitle').value);
-                formData.append('description', document.getElementById('dreamDescription').value);
                 formData.append('type', 'dream');
                 formData.append('priority', document.getElementById('dreamPriority').value);
                 formData.append('price', '');
                 formData.append('url', '');
                 
-                // Store category in description for dreams
+                // Store category and addedBy in description for dreams
                 const category = document.getElementById('dreamCategory').value;
                 const description = document.getElementById('dreamDescription').value;
-                formData.set('description', `CATEGORY:${category}|${description}`);
+                formData.append('description', `CATEGORY:${category}|ADDEDBY:${addedBy}|${description}`);
                 
                 try {
                     const url = dreamId ? `${API_URL}/api/edit/${dreamId}` : `${API_URL}/api/add`;
@@ -1030,13 +1067,20 @@
             const item = items.find(i => i.id === id);
             if (!item) return;
             
-            // Parse emoji from description if stored there
+            // Parse emoji and addedBy from description if stored there
             let emoji = '🎁';
+            let addedBy = 'both';
             let description = item.description || '';
-            if (description.includes('|')) {
+            
+            if (description.includes('EMOJI:')) {
                 const parts = description.split('|');
-                emoji = parts[0];
-                description = parts.slice(1).join('|');
+                emoji = parts[0].replace('EMOJI:', '');
+                if (parts[1] && parts[1].includes('ADDEDBY:')) {
+                    addedBy = parts[1].replace('ADDEDBY:', '');
+                    description = parts.slice(2).join('|');
+                } else {
+                    description = parts.slice(1).join('|');
+                }
             }
             
             document.getElementById('modalTitle').textContent = '✏️ Edit Item';
@@ -1048,6 +1092,7 @@
             document.getElementById('price').value = item.price || '';
             document.getElementById('url').value = item.url || '';
             document.getElementById('emoji').value = emoji;
+            document.getElementById('addedBy').value = addedBy;
             resetEmojiSelection(emoji);
             
             document.getElementById('itemModal').classList.add('active');
@@ -1058,9 +1103,20 @@
             const thought = items.find(i => i.id === id);
             if (!thought) return;
             
+            // Parse addedBy from description
+            let addedBy = 'both';
+            let description = thought.description || '';
+            
+            if (description.includes('ADDEDBY:')) {
+                const parts = description.split('|');
+                addedBy = parts[0].replace('ADDEDBY:', '');
+                description = parts.slice(1).join('|');
+            }
+            
             document.getElementById('thoughtId').value = id;
             document.getElementById('thoughtTitle').value = thought.title;
-            document.getElementById('thoughtMessage').value = thought.description;
+            document.getElementById('thoughtMessage').value = description;
+            document.getElementById('thoughtAddedBy').value = addedBy;
             
             document.getElementById('thoughtModal').classList.add('active');
         }
@@ -1070,13 +1126,20 @@
             const dream = items.find(i => i.id === id);
             if (!dream) return;
             
-            // Parse category from description
+            // Parse category and addedBy from description
             let category = 'other';
+            let addedBy = 'both';
             let description = dream.description || '';
+            
             if (description.startsWith('CATEGORY:')) {
                 const parts = description.split('|');
                 category = parts[0].replace('CATEGORY:', '');
-                description = parts.slice(1).join('|');
+                if (parts[1] && parts[1].includes('ADDEDBY:')) {
+                    addedBy = parts[1].replace('ADDEDBY:', '');
+                    description = parts.slice(2).join('|');
+                } else {
+                    description = parts.slice(1).join('|');
+                }
             }
             
             document.getElementById('dreamId').value = id;
@@ -1084,6 +1147,7 @@
             document.getElementById('dreamDescription').value = description;
             document.getElementById('dreamCategory').value = category;
             document.getElementById('dreamPriority').value = dream.priority || 'medium';
+            document.getElementById('dreamAddedBy').value = addedBy;
             
             document.getElementById('dreamModal').classList.add('active');
         }
