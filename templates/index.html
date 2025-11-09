@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Wishlist Manager</title>
+    <title>Our Love Wishlist 💕</title>
     <style>
         * {
             margin: 0;
@@ -13,8 +13,42 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #faf5ff 0%, #fce7f3 100%);
+            background: linear-gradient(135deg, #FFF9E6 0%, #FFE5B4 25%, #FFD700 50%, #FFA500 75%, #FFE5B4 100%);
+            background-size: 400% 400%;
+            animation: sunflowerGradient 15s ease infinite;
             min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes sunflowerGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .heart-bg {
+            position: fixed;
+            top: -10%;
+            left: 0;
+            width: 100%;
+            height: 110%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 2rem;
+            animation: floatHeart 10s infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes floatHeart {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0.3; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
         }
 
         @keyframes fadeIn {
@@ -25,16 +59,29 @@
         .fade-in {
             animation: fadeIn 0.5s ease-out forwards;
         }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
         
         .modal {
             display: none;
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            overflow-y: auto;
+            padding: 1rem;
         }
         
         .modal.active {
@@ -42,231 +89,609 @@
         }
 
         .gradient-text {
-            background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF1493 50%, #FF69B4 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF1493 100%);
             color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
             font-weight: 600;
             border: none;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(168, 85, 247, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
+            font-size: 1rem;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+            background: linear-gradient(135deg, #FF1493 0%, #FF6B6B 100%);
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(168, 85, 247, 0.4);
+            box-shadow: 0 6px 20px rgba(255, 20, 147, 0.6);
         }
 
         .card {
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            border: 2px solid rgba(255, 215, 0, 0.3);
         }
 
         .card:hover {
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 40px rgba(255, 105, 180, 0.3);
             transform: translateY(-4px);
         }
 
-        .priority-high { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-        .priority-medium { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
-        .priority-low { background-color: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .priority-high { background: linear-gradient(135deg, #FFE5E5, #FFCCCC); color: #C41E3A; border: 2px solid #FF6B6B; }
+        .priority-medium { background: linear-gradient(135deg, #FFF9E6, #FFE5B4); color: #B8860B; border: 2px solid #FFD700; }
+        .priority-low { background: linear-gradient(135deg, #E6F7FF, #B3E5FC); color: #0066CC; border: 2px solid #4FC3F7; }
 
         input, textarea, select {
             width: 100%;
             padding: 0.75rem 1rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 0.75rem;
+            border: 2px solid #FFD700;
+            border-radius: 1rem;
             font-size: 1rem;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
         }
 
         input:focus, textarea:focus, select:focus {
             outline: none;
-            border-color: #a855f7;
-            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+            border-color: #FF69B4;
+            box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.2);
+            background: white;
         }
 
         .btn-icon {
             padding: 0.5rem;
-            border-radius: 0.5rem;
+            border-radius: 50%;
             transition: all 0.2s ease;
             cursor: pointer;
             border: none;
-            background: transparent;
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 1.2rem;
         }
 
-        .btn-icon:hover { background-color: #f3f4f6; }
-        .btn-edit:hover { background-color: #dbeafe; }
-        .btn-delete:hover { background-color: #fee2e2; }
+        .btn-icon:hover {
+            background: #FFE5B4;
+            transform: scale(1.1);
+        }
+
+        .btn-edit:hover { background: #B3E5FC; }
+        .btn-delete:hover { background: #FFCCCC; }
 
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
         }
 
         @media (max-width: 768px) {
-            .grid-container { grid-template-columns: 1fr; }
+            .grid-container { 
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            body {
+                font-size: 14px;
+            }
+            .btn-primary {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
         }
 
         .loading {
             text-align: center;
             padding: 2rem;
-            color: #6b7280;
+            color: #8B4513;
+            font-size: 1.2rem;
+        }
+
+        .section-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #8B4513;
+            font-size: 0.95rem;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF1493 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #8B4513;
+        }
+
+        .love-thought-card {
+            background: linear-gradient(135deg, #FFF0F5, #FFE4E1);
+            border: 2px solid #FF69B4;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.2);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 1rem;
+            margin: 1rem 0;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+        }
+
+        .links-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .link-tag {
+            background: linear-gradient(135deg, #E0BBE4, #D4A5D8);
+            color: #5C2E5C;
+            padding: 0.4rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .link-tag:hover {
+            background: linear-gradient(135deg, #D4A5D8, #C68FC4);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
+        }
+
+        .added-by-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #FFE5E5, #FFCCCC);
+            color: #C41E3A;
+        }
+
+        .emoji-picker {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .emoji-btn {
+            font-size: 2rem;
+            padding: 0.5rem;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .emoji-btn:hover {
+            background: #FFE5B4;
+            border-color: #FFD700;
+            transform: scale(1.1);
+        }
+
+        .emoji-btn.selected {
+            background: #FF69B4;
+            border-color: #FF1493;
+            transform: scale(1.15);
+        }
+
+        .error-message {
+            background: #FEE2E2;
+            border: 2px solid #EF4444;
+            color: #991B1B;
+            padding: 1rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+        }
+
+        .section-content {
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <nav style="background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
-        <div style="max-width: 1200px; margin: 0 auto; padding: 1rem 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h1 style="font-size: 1.875rem; font-weight: 700;" class="gradient-text">
-                    Shivesh Loves Deepika Truly and Madly
+    <div class="heart-bg" id="heartBg"></div>
+
+    <nav style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(255, 105, 180, 0.3); margin-bottom: 2rem; position: sticky; top: 0; z-index: 100;">
+        <div style="max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <h1 style="font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 700;" class="gradient-text pulse">
+                    💕 Shivesh & Deepika's Love Wishlist 🌻
                 </h1>
-                <button id="addButton" class="btn-primary">
-                    + Add Item
+                <button id="addButton" class="btn-primary" onclick="openAddModal()">
+                    ✨ Add New
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 3rem;">
-        <div class="card" style="margin-bottom: 2rem;">
-            <h2 style="font-size: 2.5rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">Our Wishlist</h2>
-            <p style="color: #6b7280; font-size: 1.125rem;">We both are made for each other - <span id="itemCount">0</span> items</p>
+    <main style="max-width: 1400px; margin: 0 auto; padding: 0 1.5rem 3rem;">
+        <div class="section-tabs">
+            <button class="tab-btn active" onclick="switchSection('wishlist')">🎁 Wishlist</button>
+            <button class="tab-btn" onclick="switchSection('thoughts')">💭 Love Thoughts</button>
+            <button class="tab-btn" onclick="switchSection('dreams')">🌟 Future Dreams</button>
         </div>
 
-        <!-- Loading -->
-        <div id="loadingState" class="loading">
-            <p>Loading your wishlist...</p>
+        <!-- Wishlist Section -->
+        <div id="section-wishlist" class="section-content active">
+            <div class="card" style="margin-bottom: 2rem;">
+                <h2 style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 700; color: #C41E3A; margin-bottom: 0.5rem;">
+                    🎁 Our Wishlist
+                </h2>
+                <p style="color: #8B4513; font-size: clamp(1rem, 2vw, 1.125rem);">
+                    Things we dream of together - <span id="itemCount">0</span> wishes 💫
+                </p>
+            </div>
+
+            <div id="loadingState" class="loading">
+                <p>✨ Loading wishes... 💕</p>
+            </div>
+
+            <div id="errorState" class="error-message" style="display: none;"></div>
+
+            <div id="itemsContainer" class="grid-container"></div>
+
+            <div id="emptyState" class="card" style="display: none; text-align: center; padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🌻</div>
+                <h3 style="font-size: clamp(1.5rem, 3vw, 1.875rem); font-weight: 700; color: #C41E3A; margin-bottom: 0.5rem;">
+                    No wishes yet!
+                </h3>
+                <p style="color: #8B4513; margin-bottom: 1.5rem;">Start adding things you dream of! 💭✨</p>
+                <button onclick="openModal('wishlist')" class="btn-primary" style="padding: 0.75rem 2rem;">
+                    Add First Wish 🌟
+                </button>
+            </div>
         </div>
 
-        <!-- Items Grid -->
-        <div id="itemsContainer" class="grid-container" style="display: none;"></div>
+        <!-- Love Thoughts Section -->
+        <div id="section-thoughts" class="section-content">
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2 style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 700; color: #C41E3A; margin-bottom: 0.5rem;">
+                            💭 Love Thoughts
+                        </h2>
+                        <p style="color: #8B4513; font-size: clamp(1rem, 2vw, 1.125rem);">
+                            Sweet messages for each other 💕
+                        </p>
+                    </div>
+                    <button onclick="openModal('thoughts')" class="btn-primary">
+                        💕 Add Thought
+                    </button>
+                </div>
+            </div>
+            <div id="thoughtsContainer"></div>
+            <div id="emptyThoughts" class="card" style="display: none; text-align: center; padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">💭</div>
+                <h3 style="font-size: 1.875rem; color: #C41E3A;">No thoughts yet!</h3>
+                <p style="color: #8B4513; margin: 1rem 0;">Share your feelings! 💕</p>
+                <button onclick="openModal('thoughts')" class="btn-primary">Add Love Thought 💕</button>
+            </div>
+        </div>
 
-        <!-- Empty State -->
-        <div id="emptyState" class="card" style="display: none; text-align: center; padding: 3rem;">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">🎁</div>
-            <h3 style="font-size: 1.875rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem;">Your wishlist is empty</h3>
-            <p style="color: #6b7280; margin-bottom: 1.5rem;">Start adding items you wish for!</p>
-            <button id="addButtonEmpty" class="btn-primary" style="padding: 0.75rem 2rem;">
-                Add Your First Item
-            </button>
+        <!-- Dreams Section -->
+        <div id="section-dreams" class="section-content">
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2 style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 700; color: #C41E3A; margin-bottom: 0.5rem;">
+                            🌟 Future Dreams
+                        </h2>
+                        <p style="color: #8B4513; font-size: clamp(1rem, 2vw, 1.125rem);">
+                            All our plans together! 💫
+                        </p>
+                    </div>
+                    <button onclick="openModal('dreams')" class="btn-primary">
+                        🌟 Add Dream
+                    </button>
+                </div>
+            </div>
+            <div id="dreamsContainer"></div>
+            <div id="emptyDreams" class="card" style="display: none; text-align: center; padding: 3rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🌟</div>
+                <h3 style="font-size: 1.875rem; color: #C41E3A;">No dreams yet!</h3>
+                <p style="color: #8B4513; margin: 1rem 0;">Add your future plans! 💫</p>
+                <button onclick="openModal('dreams')" class="btn-primary">Add Dream 🌟</button>
+            </div>
         </div>
     </main>
 
-    <!-- Modal -->
+    <!-- Wishlist Modal -->
     <div id="itemModal" class="modal">
-        <div class="card" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; margin: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h3 style="font-size: 2rem; font-weight: 700; color: #1f2937;" id="modalTitle">Add New Item</h3>
-                <button id="closeModalBtn" style="background:none;border:none;font-size:2.5rem;color:#6b7280;cursor:pointer;">&times;</button>
+        <div class="card" style="max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; margin: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <h3 style="font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: #C41E3A;" id="modalTitle">✨ Add New Item</h3>
+                <button onclick="closeModal('itemModal')" style="background:none;border:none;font-size:2.5rem;color:#8B4513;cursor:pointer;line-height:1;">&times;</button>
             </div>
 
             <form id="itemForm">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                <input type="hidden" id="itemId" name="itemId">
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label>Choose an Emoji 😊</label>
+                    <div class="emoji-picker" id="emojiPicker">
+                        <button type="button" class="emoji-btn selected" data-emoji="🎁">🎁</button>
+                        <button type="button" class="emoji-btn" data-emoji="💕">💕</button>
+                        <button type="button" class="emoji-btn" data-emoji="🌻">🌻</button>
+                        <button type="button" class="emoji-btn" data-emoji="💍">💍</button>
+                        <button type="button" class="emoji-btn" data-emoji="🏠">🏠</button>
+                        <button type="button" class="emoji-btn" data-emoji="✈️">✈️</button>
+                        <button type="button" class="emoji-btn" data-emoji="🎮">🎮</button>
+                        <button type="button" class="emoji-btn" data-emoji="📱">📱</button>
+                        <button type="button" class="emoji-btn" data-emoji="💻">💻</button>
+                        <button type="button" class="emoji-btn" data-emoji="🎨">🎨</button>
+                        <button type="button" class="emoji-btn" data-emoji="📚">📚</button>
+                        <button type="button" class="emoji-btn" data-emoji="🎵">🎵</button>
+                        <button type="button" class="emoji-btn" data-emoji="🌸">🌸</button>
+                        <button type="button" class="emoji-btn" data-emoji="🍰">🍰</button>
+                        <button type="button" class="emoji-btn" data-emoji="☕">☕</button>
+                        <button type="button" class="emoji-btn" data-emoji="🌙">🌙</button>
+                    </div>
+                    <input type="hidden" id="emoji" name="emoji" value="🎁">
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                     <div>
-                        <label>Title <span style="color:#ef4444;">*</span></label>
-                        <input type="text" id="title" name="title" required placeholder="Item name">
+                        <label>Title <span style="color:#FF1493;">*</span></label>
+                        <input type="text" id="title" name="title" required placeholder="What do you wish for?">
                     </div>
                     <div>
-                        <label>Price</label>
-                        <input type="text" id="price" name="price" placeholder="$0.00">
+                        <label>Price 💰</label>
+                        <input type="text" id="price" name="price" placeholder="₹ 0.00">
                     </div>
                     <div>
-                        <label>Type <span style="color:#ef4444;">*</span></label>
+                        <label>Category <span style="color:#FF1493;">*</span></label>
                         <select id="type" name="type" required>
-                            <option value="personal">Personal</option>
-                            <option value="work">Work</option>
-                            <option value="hobby">Hobby</option>
-                            <option value="tech">Tech</option>
+                            <option value="together">👫 Together</option>
+                            <option value="personal">🎁 Personal</option>
+                            <option value="home">🏠 Home</option>
+                            <option value="travel">✈️ Travel</option>
+                            <option value="tech">💻 Tech</option>
+                            <option value="fashion">👗 Fashion</option>
+                            <option value="food">🍕 Food</option>
+                            <option value="other">🌟 Other</option>
                         </select>
                     </div>
                     <div>
-                        <label>Priority <span style="color:#ef4444;">*</span></label>
+                        <label>Priority <span style="color:#FF1493;">*</span></label>
                         <select id="priority" name="priority" required>
-                            <option value="high">High</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="low">Low</option>
+                            <option value="high">❤️ High</option>
+                            <option value="medium" selected>💛 Medium</option>
+                            <option value="low">💙 Low</option>
                         </select>
                     </div>
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
-                    <label>Description</label>
-                    <textarea id="description" name="description" rows="4" placeholder="Add details..."></textarea>
+                    <label>Description 📝</label>
+                    <textarea id="description" name="description" rows="3" placeholder="Tell me more about this..."></textarea>
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
-                    <label>URL</label>
-                    <input type="url" id="url" name="url" placeholder="https://example.com">
+                    <label>Link 🔗</label>
+                    <input type="url" id="url" name="url" placeholder="https://...">
                 </div>
 
-                <div style="display: flex; gap: 1rem; padding-top: 1rem;">
-                    <button type="submit" class="btn-primary" style="flex: 1; padding: 0.75rem;">Save Item</button>
-                    <button type="button" id="cancelBtn" style="padding: 0.75rem 2rem; border: 2px solid #d1d5db; background: white; color: #374151; border-radius: 0.75rem; font-weight: 600; cursor: pointer;">Cancel</button>
+                <div style="display: flex; gap: 1rem; padding-top: 1rem; flex-wrap: wrap;">
+                    <button type="submit" class="btn-primary" style="flex: 1; min-width: 150px; padding: 0.75rem;">
+                        💕 Save Item
+                    </button>
+                    <button type="button" onclick="closeModal('itemModal')" style="padding: 0.75rem 2rem; border: 2px solid #FFD700; background: white; color: #8B4513; border-radius: 2rem; font-weight: 600; cursor: pointer;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Love Thought Modal -->
+    <div id="thoughtModal" class="modal">
+        <div class="card" style="max-width: 600px; width: 95%; margin: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.75rem; font-weight: 700; color: #C41E3A;">💭 Add Love Thought</h3>
+                <button onclick="closeModal('thoughtModal')" style="background:none;border:none;font-size:2.5rem;color:#8B4513;cursor:pointer;line-height:1;">&times;</button>
+            </div>
+
+            <form id="thoughtForm">
+                <input type="hidden" id="thoughtId">
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label>Title <span style="color:#FF1493;">*</span></label>
+                    <input type="text" id="thoughtTitle" required placeholder="Thought title...">
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label>Your Message <span style="color:#FF1493;">*</span></label>
+                    <textarea id="thoughtMessage" rows="5" required placeholder="Express your love..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn-primary" style="flex: 1; padding: 0.75rem;">
+                        💕 Save Thought
+                    </button>
+                    <button type="button" onclick="closeModal('thoughtModal')" style="padding: 0.75rem 2rem; border: 2px solid #FFD700; background: white; color: #8B4513; border-radius: 2rem; font-weight: 600; cursor: pointer;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dream Modal -->
+    <div id="dreamModal" class="modal">
+        <div class="card" style="max-width: 700px; width: 95%; margin: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.75rem; font-weight: 700; color: #C41E3A;">🌟 Add Future Dream</h3>
+                <button onclick="closeModal('dreamModal')" style="background:none;border:none;font-size:2.5rem;color:#8B4513;cursor:pointer;line-height:1;">&times;</button>
+            </div>
+
+            <form id="dreamForm">
+                <input type="hidden" id="dreamId">
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label>Dream Title <span style="color:#FF1493;">*</span></label>
+                        <input type="text" id="dreamTitle" required placeholder="Our dream...">
+                    </div>
+                    <div>
+                        <label>Category <span style="color:#FF1493;">*</span></label>
+                        <select id="dreamCategory" required>
+                            <option value="travel">✈️ Travel</option>
+                            <option value="home">🏠 Home</option>
+                            <option value="career">💼 Career</option>
+                            <option value="family">👨‍👩‍👧 Family</option>
+                            <option value="personal">🌟 Personal</option>
+                            <option value="other">💫 Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Priority <span style="color:#FF1493;">*</span></label>
+                        <select id="dreamPriority" required>
+                            <option value="high">❤️ High</option>
+                            <option value="medium" selected>💛 Medium</option>
+                            <option value="low">💙 Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label>Description 📝</label>
+                    <textarea id="dreamDescription" rows="4" placeholder="Describe your dream..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="btn-primary" style="flex: 1; padding: 0.75rem;">
+                        💫 Save Dream
+                    </button>
+                    <button type="button" onclick="closeModal('dreamModal')" style="padding: 0.75rem 2rem; border: 2px solid #FFD700; background: white; color: #8B4513; border-radius: 2rem; font-weight: 600; cursor: pointer;">
+                        Cancel
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        const API_URL = '';
+        // CHANGE THIS TO YOUR DEPLOYED BACKEND URL
+        const API_URL = 'http://localhost:8000';
+        
         let items = [];
+        let currentSection = 'wishlist';
         let editingItemId = null;
 
-        function openModal() {
-            document.getElementById('itemModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadItems();
+            initializeFloatingHearts();
+            setupEmojiPicker();
+            setupFormHandlers();
+        });
 
-        function closeModal() {
-            document.getElementById('itemModal').classList.remove('active');
-            document.body.style.overflow = 'auto';
-            document.getElementById('itemForm').reset();
-            document.getElementById('modalTitle').textContent = 'Add New Item';
-            editingItemId = null;
-        }
-
+        // Load items from API
         async function loadItems() {
             try {
                 document.getElementById('loadingState').style.display = 'block';
-                document.getElementById('itemsContainer').style.display = 'none';
-                document.getElementById('emptyState').style.display = 'none';
-
+                document.getElementById('errorState').style.display = 'none';
+                
                 const response = await fetch(`${API_URL}/api/items`);
-                if (!response.ok) throw new Error('Failed');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch items');
+                }
+                
                 items = await response.json();
+                document.getElementById('loadingState').style.display = 'none';
+                
                 renderItems();
-            } catch (err) {
-                document.getElementById('loadingState').innerHTML = 
-                    '<p style="color:red;">Backend not running!<br>Run: <code>uvicorn main.py --reload</code></p>';
+            } catch (error) {
+                console.error('Error loading items:', error);
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('errorState').style.display = 'block';
+                document.getElementById('errorState').textContent = 'Failed to load items. Please check if the backend is running.';
             }
         }
 
+        // Render items based on current section
         function renderItems() {
+            const wishlistItems = items.filter(item => item.type !== 'thought' && item.type !== 'dream');
+            const thoughts = items.filter(item => item.type === 'thought');
+            const dreams = items.filter(item => item.type === 'dream');
+
+            renderWishlist(wishlistItems);
+            renderThoughts(thoughts);
+            renderDreams(dreams);
+        }
+
+        // Render wishlist items
+        function renderWishlist(wishlistItems) {
             const container = document.getElementById('itemsContainer');
             const emptyState = document.getElementById('emptyState');
-            const loading = document.getElementById('loadingState');
-            
-            loading.style.display = 'none';
-            document.getElementById('itemCount').textContent = items.length;
+            const itemCount = document.getElementById('itemCount');
 
-            if (items.length === 0) {
+            itemCount.textContent = wishlistItems.length;
+
+            if (wishlistItems.length === 0) {
                 container.style.display = 'none';
                 emptyState.style.display = 'block';
                 return;
@@ -275,80 +700,427 @@
             container.style.display = 'grid';
             emptyState.style.display = 'none';
 
-            container.innerHTML = items.map((item, i) => `
-                <div class="card fade-in" style="animation-delay: ${i * 0.1}s; opacity: 0;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <span style="font-size: 2rem;">${item.type === 'personal' ? '🎁' : item.type === 'work' ? '💼' : item.type === 'hobby' ? '🎨' : '💻'}</span>
-                            <span class="priority-${item.priority}" style="padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">
-                                ${item.priority.toUpperCase()}
-                            </span>
-                        </div>
+            container.innerHTML = wishlistItems.map(item => `
+                <div class="card priority-${item.priority || 'medium'} fade-in">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div style="font-size: 3rem;">${item.emoji || '🎁'}</div>
                         <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="editItem('${item.id}')" class="btn-icon btn-edit">✏️</button>
-                            <button onclick="deleteItem('${item.id}')" class="btn-icon btn-delete">🗑️</button>
+                            <button class="btn-icon btn-edit" onclick="editItem('${item.id}')" title="Edit">
+                                ✏️
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteItem('${item.id}')" title="Delete">
+                                🗑️
+                            </button>
                         </div>
                     </div>
-                    <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.5rem;">${item.title}</h3>
-                    ${item.price ? `<p style="font-size:1.5rem;font-weight:700;color:#a855f7;margin-bottom:0.5rem;">${item.price}</p>` : ''}
-                    ${item.description ? `<p style="color:#6b7280;font-size:0.875rem;margin-bottom:1rem;">${item.description}</p>` : ''}
-                    ${item.url ? `<a href="${item.url}" target="_blank" style="color:#2563eb;font-size:0.875rem;">View Link</a>` : ''}
-                    <div style="font-size:0.75rem;color:#9ca3af;padding-top:0.75rem;border-top:1px solid #f3f4f6;margin-top:1rem;">
-                        Added ${new Date(item.createdAt).toLocaleDateString()}
+                    
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: inherit;">
+                        ${item.title}
+                    </h3>
+                    
+                    ${item.description ? `
+                        <p style="color: #5C4033; margin-bottom: 0.75rem; line-height: 1.6;">
+                            ${item.description}
+                        </p>
+                    ` : ''}
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem;">
+                        <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                            ${getCategoryIcon(item.type)} ${item.type}
+                        </span>
+                        ${item.price ? `
+                            <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                                💰 ${item.price}
+                            </span>
+                        ` : ''}
+                        ${item.url ? `
+                            <a href="${item.url}" target="_blank" class="link-tag">
+                                🔗 View Link
+                            </a>
+                        ` : ''}
                     </div>
                 </div>
             `).join('');
         }
 
-        window.editItem = function(id) {
+        // Render thoughts
+        function renderThoughts(thoughts) {
+            const container = document.getElementById('thoughtsContainer');
+            const emptyState = document.getElementById('emptyThoughts');
+
+            if (thoughts.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            container.innerHTML = thoughts.map(thought => `
+                <div class="love-thought-card fade-in">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: #C41E3A;">
+                            💭 ${thought.title}
+                        </h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-icon btn-edit" onclick="editThought('${thought.id}')" title="Edit">
+                                ✏️
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteItem('${thought.id}')" title="Delete">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    <p style="color: #5C4033; line-height: 1.8; font-size: 1.1rem;">
+                        ${thought.description}
+                    </p>
+                    ${thought.createdAt ? `
+                        <p style="color: #999; font-size: 0.85rem; margin-top: 1rem; text-align: right;">
+                            ${new Date(thought.createdAt).toLocaleDateString()}
+                        </p>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Render dreams
+        function renderDreams(dreams) {
+            const container = document.getElementById('dreamsContainer');
+            const emptyState = document.getElementById('emptyDreams');
+
+            if (dreams.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            container.innerHTML = dreams.map(dream => `
+                <div class="card priority-${dream.priority || 'medium'} fade-in">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <h3 style="font-size: 1.75rem; font-weight: 700; color: inherit; margin-bottom: 0.5rem;">
+                                🌟 ${dream.title}
+                            </h3>
+                            <span style="background: rgba(255, 255, 255, 0.7); padding: 0.4rem 0.8rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600;">
+                                ${getCategoryIcon(dream.category || dream.type)} ${dream.category || dream.type}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn-icon btn-edit" onclick="editDream('${dream.id}')" title="Edit">
+                                ✏️
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteItem('${dream.id}')" title="Delete">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    ${dream.description ? `
+                        <p style="color: #5C4033; line-height: 1.6; margin-top: 1rem;">
+                            ${dream.description}
+                        </p>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Get category icon
+        function getCategoryIcon(type) {
+            const icons = {
+                'together': '👫',
+                'personal': '🎁',
+                'home': '🏠',
+                'travel': '✈️',
+                'tech': '💻',
+                'fashion': '👗',
+                'food': '🍕',
+                'career': '💼',
+                'family': '👨‍👩‍👧',
+                'other': '🌟'
+            };
+            return icons[type] || '🌟';
+        }
+
+        // Switch section
+        function switchSection(section) {
+            currentSection = section;
+            
+            // Update tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('.section-content').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            document.getElementById(`section-${section}`).classList.add('active');
+        }
+
+        // Open modal based on section
+        function openAddModal() {
+            if (currentSection === 'wishlist') {
+                openModal('wishlist');
+            } else if (currentSection === 'thoughts') {
+                openModal('thoughts');
+            } else if (currentSection === 'dreams') {
+                openModal('dreams');
+            }
+        }
+
+        // Open modal
+        function openModal(type) {
+            editingItemId = null;
+            
+            if (type === 'wishlist') {
+                document.getElementById('modalTitle').textContent = '✨ Add New Item';
+                document.getElementById('itemForm').reset();
+                document.getElementById('itemId').value = '';
+                document.getElementById('emoji').value = '🎁';
+                resetEmojiSelection('🎁');
+                document.getElementById('itemModal').classList.add('active');
+            } else if (type === 'thoughts') {
+                document.getElementById('thoughtForm').reset();
+                document.getElementById('thoughtId').value = '';
+                document.getElementById('thoughtModal').classList.add('active');
+            } else if (type === 'dreams') {
+                document.getElementById('dreamForm').reset();
+                document.getElementById('dreamId').value = '';
+                document.getElementById('dreamModal').classList.add('active');
+            }
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            editingItemId = null;
+        }
+
+        // Setup emoji picker
+        function setupEmojiPicker() {
+            document.querySelectorAll('.emoji-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.emoji-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    document.getElementById('emoji').value = btn.dataset.emoji;
+                });
+            });
+        }
+
+        // Reset emoji selection
+        function resetEmojiSelection(emoji) {
+            document.querySelectorAll('.emoji-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.dataset.emoji === emoji) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+
+        // Setup form handlers
+        function setupFormHandlers() {
+            // Wishlist form
+            document.getElementById('itemForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData();
+                const itemId = document.getElementById('itemId').value;
+                
+                formData.append('title', document.getElementById('title').value);
+                formData.append('description', document.getElementById('description').value);
+                formData.append('type', document.getElementById('type').value);
+                formData.append('priority', document.getElementById('priority').value);
+                formData.append('price', document.getElementById('price').value);
+                formData.append('url', document.getElementById('url').value);
+                
+                // Add emoji to description for storage
+                const emoji = document.getElementById('emoji').value;
+                const description = document.getElementById('description').value;
+                formData.set('description', `${emoji}|${description}`);
+                
+                try {
+                    const url = itemId ? `${API_URL}/api/edit/${itemId}` : `${API_URL}/api/add`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to save item');
+                    
+                    closeModal('itemModal');
+                    await loadItems();
+                } catch (error) {
+                    console.error('Error saving item:', error);
+                    alert('Failed to save item. Please try again.');
+                }
+            });
+
+            // Thought form
+            document.getElementById('thoughtForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData();
+                const thoughtId = document.getElementById('thoughtId').value;
+                
+                formData.append('title', document.getElementById('thoughtTitle').value);
+                formData.append('description', document.getElementById('thoughtMessage').value);
+                formData.append('type', 'thought');
+                formData.append('priority', 'medium');
+                formData.append('price', '');
+                formData.append('url', '');
+                
+                try {
+                    const url = thoughtId ? `${API_URL}/api/edit/${thoughtId}` : `${API_URL}/api/add`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to save thought');
+                    
+                    closeModal('thoughtModal');
+                    await loadItems();
+                } catch (error) {
+                    console.error('Error saving thought:', error);
+                    alert('Failed to save thought. Please try again.');
+                }
+            });
+
+            // Dream form
+            document.getElementById('dreamForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const formData = new FormData();
+                const dreamId = document.getElementById('dreamId').value;
+                
+                formData.append('title', document.getElementById('dreamTitle').value);
+                formData.append('description', document.getElementById('dreamDescription').value);
+                formData.append('type', 'dream');
+                formData.append('priority', document.getElementById('dreamPriority').value);
+                formData.append('price', '');
+                formData.append('url', '');
+                
+                // Store category in description for dreams
+                const category = document.getElementById('dreamCategory').value;
+                const description = document.getElementById('dreamDescription').value;
+                formData.set('description', `CATEGORY:${category}|${description}`);
+                
+                try {
+                    const url = dreamId ? `${API_URL}/api/edit/${dreamId}` : `${API_URL}/api/add`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to save dream');
+                    
+                    closeModal('dreamModal');
+                    await loadItems();
+                } catch (error) {
+                    console.error('Error saving dream:', error);
+                    alert('Failed to save dream. Please try again.');
+                }
+            });
+        }
+
+        // Edit item
+        async function editItem(id) {
             const item = items.find(i => i.id === id);
             if (!item) return;
-            editingItemId = id;
-            document.getElementById('modalTitle').textContent = 'Edit Item';
+            
+            // Parse emoji from description if stored there
+            let emoji = '🎁';
+            let description = item.description || '';
+            if (description.includes('|')) {
+                const parts = description.split('|');
+                emoji = parts[0];
+                description = parts.slice(1).join('|');
+            }
+            
+            document.getElementById('modalTitle').textContent = '✏️ Edit Item';
+            document.getElementById('itemId').value = id;
             document.getElementById('title').value = item.title;
-            document.getElementById('description').value = item.description || '';
+            document.getElementById('description').value = description;
             document.getElementById('type').value = item.type;
-            document.getElementById('priority').value = item.priority;
+            document.getElementById('priority').value = item.priority || 'medium';
             document.getElementById('price').value = item.price || '';
             document.getElementById('url').value = item.url || '';
-            openModal();
-        };
+            document.getElementById('emoji').value = emoji;
+            resetEmojiSelection(emoji);
+            
+            document.getElementById('itemModal').classList.add('active');
+        }
 
-        window.deleteItem = async function(id) {
-            if (!confirm('Delete forever?')) return;
-            try {
-                const res = await fetch(`${API_URL}/api/delete/${id}`, { method: 'POST' });
-                if (res.ok) loadItems();
-            } catch (e) { alert('Delete failed'); }
-        };
+        // Edit thought
+        async function editThought(id) {
+            const thought = items.find(i => i.id === id);
+            if (!thought) return;
+            
+            document.getElementById('thoughtId').value = id;
+            document.getElementById('thoughtTitle').value = thought.title;
+            document.getElementById('thoughtMessage').value = thought.description;
+            
+            document.getElementById('thoughtModal').classList.add('active');
+        }
 
-        document.getElementById('itemForm').onsubmit = async function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const url = editingItemId ? `${API_URL}/api/edit/${editingItemId}` : `${API_URL}/api/add`;
-
-            try {
-                const res = await fetch(url, { method: 'POST', body: formData });
-                if (res.ok) {
-                    closeModal();
-                    loadItems();
-                } else {
-                    alert('Save failed!');
-                }
-            } catch (err) {
-                alert('No connection! Run: uvicorn main.py --reload');
+        // Edit dream
+        async function editDream(id) {
+            const dream = items.find(i => i.id === id);
+            if (!dream) return;
+            
+            // Parse category from description
+            let category = 'other';
+            let description = dream.description || '';
+            if (description.startsWith('CATEGORY:')) {
+                const parts = description.split('|');
+                category = parts[0].replace('CATEGORY:', '');
+                description = parts.slice(1).join('|');
             }
-        };
+            
+            document.getElementById('dreamId').value = id;
+            document.getElementById('dreamTitle').value = dream.title;
+            document.getElementById('dreamDescription').value = description;
+            document.getElementById('dreamCategory').value = category;
+            document.getElementById('dreamPriority').value = dream.priority || 'medium';
+            
+            document.getElementById('dreamModal').classList.add('active');
+        }
 
-        document.getElementById('addButton').onclick = openModal;
-        document.getElementById('addButtonEmpty').onclick = openModal;
-        document.getElementById('closeModalBtn').onclick = closeModal;
-        document.getElementById('cancelBtn').onclick = closeModal;
-        document.getElementById('itemModal').onclick = (e) => {
-            if (e.target === document.getElementById('itemModal')) closeModal();
-        };
+        // Delete item
+        async function deleteItem(id) {
+            if (!confirm('Are you sure you want to delete this item?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/delete/${id}`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) throw new Error('Failed to delete item');
+                
+                await loadItems();
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                alert('Failed to delete item. Please try again.');
+            }
+        }
 
-        loadItems();
+        // Initialize floating hearts
+        function initializeFloatingHearts() {
+            const heartBg = document.getElementById('heartBg');
+            const hearts = ['💕', '💖', '💗', '💓', '💝', '🌻', '🌸', '🌺'];
+            
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.left = `${Math.random() * 100}%`;
+                heart.style.animationDelay = `${Math.random() * 10}s`;
+                heart.style.animationDuration = `${8 + Math.random() * 4}s`;
+                heartBg.appendChild(heart);
+            }
+        }
     </script>
 </body>
 </html>
